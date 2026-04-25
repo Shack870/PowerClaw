@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "powerclaw"
+version = "0.1.0"
+description = "Native unified agent runtime for the PowerClaw workspace"
+readme = "POWERCLAW_ARCHITECTURE.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0,<10",
+]
+
+[project.scripts]
+powerclaw = "powerclaw.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["powerclaw", "powerclaw.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82", "I"]

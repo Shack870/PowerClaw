@@ -1,0 +1,35 @@
+[Unit]
+Description=PowerClaw Agent Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=powerclaw
+Group=powerclaw
+WorkingDirectory=/opt/powerclaw
+EnvironmentFile=/etc/powerclaw/powerclaw.env
+Environment=UV_CACHE_DIR=/var/lib/powerclaw/uv-cache
+Environment=XDG_CACHE_HOME=/var/lib/powerclaw/cache
+ExecStart=/usr/local/bin/uv run powerclaw serve
+Restart=always
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
+ReadWritePaths=/var/lib/powerclaw /opt/powerclaw
+LimitNOFILE=65535
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
