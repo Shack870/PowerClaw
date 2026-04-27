@@ -99,7 +99,7 @@ DASHBOARD_HTML = """<!doctype html>
     input:focus, textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255, 230, 109, 0.25); }
     header {
       display: grid;
-      grid-template-columns: 1fr minmax(300px, 500px);
+      grid-template-columns: 1fr auto;
       gap: 18px;
       align-items: center;
       padding: 20px 24px;
@@ -127,7 +127,8 @@ DASHBOARD_HTML = """<!doctype html>
       text-shadow: 2px 2px 0 #000;
     }
     .subtitle { margin-top: 7px; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
-    .auth-box { display: grid; gap: 6px; }
+    .auth-box { display: none; gap: 6px; margin-top: 8px; min-width: 340px; }
+    .auth-box.open { display: grid; }
     .auth-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
     .hint { color: var(--muted); font-size: 12px; }
     .saved { color: var(--green); font-size: 12px; min-height: 16px; }
@@ -255,15 +256,18 @@ DASHBOARD_HTML = """<!doctype html>
   <header>
     <div>
       <h1>PowerClaw OS</h1>
-      <div id="health" class="subtitle">Insert token. Boot local operator console.</div>
+      <div id="health" class="subtitle">Boot local operator console.</div>
     </div>
-    <div class="auth-box">
-      <div class="auth-row">
-        <input id="token" type="password" autocomplete="off" placeholder="Dashboard access token, not OpenAI key">
-        <button id="save-token">Save</button>
+    <div>
+      <button id="toggle-access" type="button">Access</button>
+      <div id="auth-box" class="auth-box">
+        <div class="auth-row">
+          <input id="token" type="password" autocomplete="off" placeholder="Dashboard token">
+          <button id="save-token">Save</button>
+        </div>
+        <div class="hint">Dashboard API token only. OpenAI is configured before PowerClaw starts.</div>
+        <div id="token-saved" class="saved"></div>
       </div>
-      <div class="hint">This only unlocks the dashboard API. Set OpenAI with <code>OPENAI_API_KEY</code> before starting PowerClaw.</div>
-      <div id="token-saved" class="saved"></div>
     </div>
   </header>
   <main>
@@ -355,11 +359,14 @@ DASHBOARD_HTML = """<!doctype html>
     };
     const $ = (id) => document.getElementById(id);
     $("token").value = state.token;
+    if (state.token) $("toggle-access").textContent = "Access Saved";
+    $("toggle-access").onclick = () => $("auth-box").classList.toggle("open");
 
     $("save-token").onclick = () => {
       state.token = $("token").value.trim();
       localStorage.setItem("powerclaw-token", state.token);
       $("token-saved").textContent = state.token ? "Dashboard token saved locally in this browser." : "Dashboard token cleared.";
+      $("toggle-access").textContent = state.token ? "Access Saved" : "Access";
       refresh();
       setTimeout(() => $("token-saved").textContent = "", 3000);
     };

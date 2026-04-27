@@ -33,7 +33,8 @@ def test_http_service_turn_and_memory_search_with_auth(tmp_path) -> None:
         with urlopen(f"{base_url}/dashboard", timeout=5) as response:
             dashboard = response.read()
             assert b"PowerClaw OS" in dashboard
-            assert b"Dashboard access token, not OpenAI key" in dashboard
+            assert b"Dashboard token" in dashboard
+            assert b"Dashboard API token only" in dashboard
             assert b"PowerClaw Reply" in dashboard
             assert b"Repo Operator" in dashboard
 
