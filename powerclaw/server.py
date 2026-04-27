@@ -39,6 +39,7 @@ class PowerClawHTTPService:
         return {
             "ok": True,
             "service": "powerclaw",
+            "auth_required": bool(self.auth_token),
             "sessions": session_count,
             "workspace": str(self.settings.runtime.workspace_dir),
             "tools": self.agent.available_tools(),

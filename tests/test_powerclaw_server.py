@@ -31,13 +31,21 @@ def test_http_service_turn_and_memory_search_with_auth(tmp_path) -> None:
             raise AssertionError("unauthorized request unexpectedly succeeded")
 
         with urlopen(f"{base_url}/dashboard", timeout=5) as response:
-            assert b"PowerClaw" in response.read()
+            dashboard = response.read()
+            assert b"PowerClaw OS" in dashboard
+            assert b"Dashboard access token, not OpenAI key" in dashboard
+            assert b"PowerClaw Reply" in dashboard
+            assert b"Repo Operator" in dashboard
 
         health = _json_request(
             f"{base_url}/health",
             headers={"Authorization": "Bearer secret"},
         )
         assert health["ok"] is True
+        assert health["auth_required"] is True
+        assert health["model_provider"]
+        assert health["model"]
+        assert "model_providers_available" in health
 
         turn = _json_request(
             f"{base_url}/v1/turn",
