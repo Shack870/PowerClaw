@@ -19,15 +19,19 @@ def register_terminal_tool(registry: ToolRegistry) -> None:
     registry.register_function(
         name="terminal",
         description=(
-            "Run a terminal command in the current workspace. In trusted terminal mode, "
-            "commands run without approval; otherwise unapproved commands create an approval request."
+            "Run a terminal command on this machine. In trusted terminal mode, commands run "
+            "without approval and may use absolute paths such as the user's Desktop; otherwise "
+            "unapproved commands create an approval request."
         ),
         input_schema={
             "type": "object",
             "properties": {
                 "command": {
                     "type": "string",
-                    "description": "Exact command string to execute without shell expansion.",
+                    "description": (
+                        "Exact command string to execute. Use platform-appropriate commands; "
+                        "absolute paths are allowed when trusted terminal mode is enabled."
+                    ),
                 },
                 "timeout_seconds": {
                     "type": "number",

@@ -70,6 +70,30 @@ def test_runtime_executes_allowed_tool_call_and_continues_model_loop() -> None:
     assert turn.messages[-1].content == "Done."
 
 
+def test_runtime_tells_model_when_terminal_is_trusted(tmp_path) -> None:
+    provider = ScriptedModelProvider([ModelResponse(model="fake-model", content="Done.")])
+    router = ModelRouter(default_model="fake-model")
+    router.register_provider("fake", provider)
+    settings = PowerClawSettings(
+        runtime=RuntimeSettings(
+            workspace_dir=tmp_path,
+            terminal_enabled=True,
+            terminal_trusted=True,
+            enable_reflection=False,
+        ),
+        models=ModelSettings(default_provider="fake", default_model="fake-model"),
+    )
+
+    agent = PowerClawAgent(settings=settings, model_router=router)
+    agent.run_turn(agent.create_session(platform="http"), "create a desktop file")
+
+    system_messages = [
+        message.content for message in provider.requests[0].messages if message.role == "system"
+    ]
+    assert any("Trusted terminal mode is enabled" in message for message in system_messages)
+    assert any("Desktop" in message for message in system_messages)
+
+
 def test_runtime_blocks_registered_tool_not_in_active_toolset() -> None:
     tools = ToolRegistry()
     called = False

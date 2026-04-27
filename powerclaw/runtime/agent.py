@@ -263,6 +263,15 @@ class PowerClawAgent:
                 metadata={"kind": "session-context"},
             ),
         ]
+        terminal_policy = self._terminal_policy_message()
+        if terminal_policy:
+            messages.append(
+                MessageRecord(
+                    role="system",
+                    content=terminal_policy,
+                    metadata={"kind": "terminal-policy"},
+                )
+            )
         for activation in activations:
             messages.append(
                 MessageRecord(
@@ -272,6 +281,23 @@ class PowerClawAgent:
                 )
             )
         return messages
+
+    def _terminal_policy_message(self) -> str | None:
+        if not self.settings.runtime.terminal_enabled:
+            return None
+        if self.settings.runtime.terminal_trusted:
+            return (
+                "Trusted terminal mode is enabled. You may use the terminal tool to run "
+                "commands needed to satisfy the user's request without asking for approval. "
+                "The terminal can access absolute paths on this machine, including the user's "
+                "Desktop, not just files inside the workspace. Prefer direct, minimal commands "
+                "and report the command result."
+            )
+        return (
+            "Terminal tool is enabled in approval mode. If a command is needed, call the "
+            "terminal tool; unapproved commands will create a pending approval request instead "
+            "of running."
+        )
 
     def _run_model_loop(
         self,
