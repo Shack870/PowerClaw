@@ -42,6 +42,14 @@ class PowerClawHTTPService:
             "sessions": session_count,
             "workspace": str(self.settings.runtime.workspace_dir),
             "tools": self.agent.available_tools(),
+            "model_provider": self.settings.models.default_provider,
+            "model": self.settings.models.default_model,
+            "model_providers_available": self.agent.dependencies.models.has_providers(),
+            "model_diagnostics": [
+                diagnostic.to_dict() for diagnostic in self.agent.dependencies.models.diagnostics()
+            ],
+            "reflection_enabled": self.settings.runtime.enable_reflection,
+            "terminal_enabled": self.settings.runtime.terminal_enabled,
             "metrics": self.metrics(),
         }
 
