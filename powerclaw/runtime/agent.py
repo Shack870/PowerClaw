@@ -167,6 +167,7 @@ class PowerClawAgent:
                         "terminal_allowed_commands": list(
                             self.settings.runtime.terminal_allowed_commands
                         ),
+                        "terminal_trusted": self.settings.runtime.terminal_trusted,
                         "terminal_timeout_seconds": self.settings.runtime.terminal_timeout_seconds,
                         "terminal_max_output_bytes": self.settings.runtime.terminal_max_output_bytes,
                         "permission_manager": self.dependencies.permissions,

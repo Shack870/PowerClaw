@@ -450,7 +450,7 @@ DASHBOARD_HTML = """<!doctype html>
         <div class="card">
           <strong>Machine Policy</strong>
           <div class="muted">Reflection: ${health.reflection_enabled ? "on" : "off"}</div>
-          <div class="muted">Terminal: ${health.terminal_enabled ? "enabled" : "disabled"}</div>
+          <div class="muted">Terminal: ${health.terminal_enabled ? (health.terminal_trusted ? "trusted full access" : "approval mode") : "disabled"}</div>
           <div class="muted">Sessions: ${health.sessions}</div>
         </div>
       `;

@@ -35,6 +35,7 @@ class RuntimeSettings:
     enabled_toolsets: tuple[str, ...] = ()
     disabled_toolsets: tuple[str, ...] = ()
     terminal_enabled: bool = False
+    terminal_trusted: bool = False
     terminal_allowed_commands: tuple[str, ...] = ()
     terminal_timeout_seconds: float = 30.0
     terminal_max_output_bytes: int = 24_000
@@ -121,7 +122,9 @@ class PowerClawSettings:
             enable_reflection=_env_flag(env.get("POWERCLAW_ENABLE_REFLECTION"), True),
             enabled_toolsets=_split_csv(env.get("POWERCLAW_ENABLED_TOOLSETS")),
             disabled_toolsets=_split_csv(env.get("POWERCLAW_DISABLED_TOOLSETS")),
-            terminal_enabled=_env_flag(env.get("POWERCLAW_ENABLE_TERMINAL"), False),
+            terminal_enabled=_env_flag(env.get("POWERCLAW_ENABLE_TERMINAL"), False)
+            or _env_flag(env.get("POWERCLAW_TERMINAL_TRUSTED"), False),
+            terminal_trusted=_env_flag(env.get("POWERCLAW_TERMINAL_TRUSTED"), False),
             terminal_allowed_commands=_split_csv(env.get("POWERCLAW_TERMINAL_ALLOWED_COMMANDS")),
             terminal_timeout_seconds=float(env.get("POWERCLAW_TERMINAL_TIMEOUT_SECONDS", "30")),
             terminal_max_output_bytes=int(env.get("POWERCLAW_TERMINAL_MAX_OUTPUT_BYTES", "24000")),

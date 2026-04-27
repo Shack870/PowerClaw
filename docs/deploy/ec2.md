@@ -213,6 +213,16 @@ If a command is not preconfigured, the runtime creates an approval request. Use
 the dashboard or approvals API to approve the exact command for the session.
 Use this for tightly scoped operational tasks, not broad shell access.
 
+For isolated throwaway VMs where the operator explicitly wants full machine
+control, trusted terminal mode removes per-command approvals:
+
+```bash
+POWERCLAW_TERMINAL_TRUSTED=true
+```
+
+This also enables the terminal tool. Do not use trusted terminal mode on shared
+hosts or systems with sensitive credentials.
+
 ## Flagship Workflow
 
 The repo-operator workflow exercises the complete runtime surface: workspace

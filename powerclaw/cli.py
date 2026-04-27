@@ -122,12 +122,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 else settings.runtime.enable_reflection,
             ),
         )
-    if args.enable_terminal or args.allow_command or args.terminal_timeout is not None:
+    if args.enable_terminal or args.trust_terminal or args.allow_command or args.terminal_timeout is not None:
         settings = replace(
             settings,
             runtime=replace(
                 settings.runtime,
                 terminal_enabled=True,
+                terminal_trusted=args.trust_terminal or settings.runtime.terminal_trusted,
                 terminal_allowed_commands=(
                     *settings.runtime.terminal_allowed_commands,
                     *(args.allow_command or ()),
@@ -169,12 +170,13 @@ def _serve_main(argv: Sequence[str]) -> int:
                 default_model=args.model or settings.models.default_model,
             ),
         )
-    if args.enable_terminal or args.allow_command:
+    if args.enable_terminal or args.trust_terminal or args.allow_command:
         settings = replace(
             settings,
             runtime=replace(
                 settings.runtime,
                 terminal_enabled=True,
+                terminal_trusted=args.trust_terminal or settings.runtime.terminal_trusted,
                 terminal_allowed_commands=(
                     *settings.runtime.terminal_allowed_commands,
                     *(args.allow_command or ()),
@@ -298,6 +300,11 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
         help="Register the guarded terminal tool for this turn.",
     )
     parser.add_argument(
+        "--trust-terminal",
+        action="store_true",
+        help="Allow terminal commands to run without per-command approval. Use only in trusted VMs.",
+    )
+    parser.add_argument(
         "--allow-command",
         action="append",
         help="Approve one exact terminal command. Implies --enable-terminal.",
@@ -321,6 +328,11 @@ def _parse_serve_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--no-tools", action="store_true", help="Disable default read-only tools.")
     parser.add_argument("--no-provider", action="store_true", help="Run without registering a model provider.")
     parser.add_argument("--enable-terminal", action="store_true", help="Register the guarded terminal tool.")
+    parser.add_argument(
+        "--trust-terminal",
+        action="store_true",
+        help="Allow terminal commands to run without per-command approval. Use only in trusted VMs.",
+    )
     parser.add_argument("--allow-command", action="append", help="Approve one exact terminal command.")
     parser.add_argument("--verbose", action="store_true", help="Enable HTTP access logs.")
     return parser.parse_args(argv)

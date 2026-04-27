@@ -67,6 +67,17 @@ requires an exact approved command string or a pending approval request:
   --message "Run the approved test command."
 ```
 
+For isolated throwaway VMs where PowerClaw should have full terminal trust, start
+it with trusted terminal mode:
+
+```bash
+POWERCLAW_TERMINAL_TRUSTED=true .venv/bin/powerclaw serve
+```
+
+Trusted terminal mode implies terminal tools are enabled and lets model-selected
+commands run without per-command approval. Use it only in machines you are
+comfortable letting PowerClaw control.
+
 ## Current Roadmap
 
 The near-term path is:

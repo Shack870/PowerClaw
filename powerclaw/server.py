@@ -51,6 +51,7 @@ class PowerClawHTTPService:
             ],
             "reflection_enabled": self.settings.runtime.enable_reflection,
             "terminal_enabled": self.settings.runtime.terminal_enabled,
+            "terminal_trusted": self.settings.runtime.terminal_trusted,
             "metrics": self.metrics(),
         }
 

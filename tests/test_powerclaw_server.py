@@ -46,6 +46,7 @@ def test_http_service_turn_and_memory_search_with_auth(tmp_path) -> None:
         assert health["model_provider"]
         assert health["model"]
         assert "model_providers_available" in health
+        assert health["terminal_trusted"] is False
 
         turn = _json_request(
             f"{base_url}/v1/turn",

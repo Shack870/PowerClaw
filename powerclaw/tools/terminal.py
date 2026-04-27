@@ -19,8 +19,8 @@ def register_terminal_tool(registry: ToolRegistry) -> None:
     registry.register_function(
         name="terminal",
         description=(
-            "Run an explicitly approved command in the current workspace. "
-            "Commands that were not approved by the operator are denied before execution."
+            "Run a terminal command in the current workspace. In trusted terminal mode, "
+            "commands run without approval; otherwise unapproved commands create an approval request."
         ),
         input_schema={
             "type": "object",
@@ -51,7 +51,8 @@ def _terminal(args: Mapping[str, Any], context: ToolExecutionContext) -> dict[st
         raise ValueError("command is required")
 
     approved_commands = tuple(context.metadata.get("terminal_allowed_commands") or ())
-    if command not in approved_commands:
+    trusted_terminal = bool(context.metadata.get("terminal_trusted"))
+    if command not in approved_commands and not trusted_terminal:
         permission_manager = context.metadata.get("permission_manager")
         if permission_manager is not None and permission_manager.is_approved(
             kind="terminal.command",

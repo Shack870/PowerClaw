@@ -51,6 +51,34 @@ def test_terminal_tool_runs_exactly_approved_command(tmp_path) -> None:
     assert payload["stdout"] == "ok\n"
 
 
+def test_terminal_tool_runs_unapproved_command_in_trusted_mode(tmp_path) -> None:
+    registry = ToolRegistry()
+    register_terminal_tool(registry)
+    command = f"{sys.executable} -c \"print('trusted')\""
+    agent = PowerClawAgent(tool_registry=registry)
+    context = ToolExecutionContext(
+        session=agent.create_session(),
+        working_directory=str(tmp_path),
+        allowed_tool_names=("terminal",),
+        enforce_tool_allowlist=True,
+        metadata={"terminal_trusted": True, "terminal_timeout_seconds": 5},
+    )
+
+    result = registry.invoke("terminal", {"command": command}, context)
+    payload = json.loads(result.content)
+
+    assert result.ok is True
+    assert payload["status"] == "completed"
+    assert payload["stdout"] == "trusted\n"
+
+
+def test_terminal_trusted_env_implies_terminal_enabled() -> None:
+    settings = PowerClawSettings.from_env({"POWERCLAW_TERMINAL_TRUSTED": "true"})
+
+    assert settings.runtime.terminal_trusted is True
+    assert settings.runtime.terminal_enabled is True
+
+
 def test_runtime_marks_denied_terminal_call_failed(tmp_path) -> None:
     registry = ToolRegistry()
     register_terminal_tool(registry)
@@ -83,3 +111,37 @@ def test_runtime_marks_denied_terminal_call_failed(tmp_path) -> None:
     payload = json.loads(turn.messages[2].content)
     assert payload["status"] == "approval_required"
     assert payload["approval_id"]
+
+
+def test_runtime_executes_terminal_call_in_trusted_mode(tmp_path) -> None:
+    registry = ToolRegistry()
+    register_terminal_tool(registry)
+    command = f"{sys.executable} -c \"print('trusted runtime')\""
+    provider = ScriptedModelProvider(
+        [
+            ModelResponse(
+                model="fake-model",
+                tool_calls=[fake_tool_call("terminal", {"command": command}, call_id="t1")],
+            ),
+            ModelResponse(model="fake-model", content="Ran trusted command."),
+        ]
+    )
+    router = ModelRouter(default_model="fake-model")
+    router.register_provider("fake", provider)
+    settings = PowerClawSettings(
+        runtime=RuntimeSettings(
+            workspace_dir=tmp_path,
+            terminal_enabled=True,
+            terminal_trusted=True,
+            enable_reflection=False,
+        ),
+        models=ModelSettings(default_provider="fake", default_model="fake-model"),
+    )
+    agent = PowerClawAgent(settings=settings, tool_registry=registry, model_router=router)
+
+    turn = agent.run_turn(agent.create_session(), "run trusted terminal")
+
+    assert turn.tool_calls[0].status == "completed"
+    payload = json.loads(turn.messages[2].content)
+    assert payload["stdout"] == "trusted runtime\n"
+    assert turn.messages[-1].content == "Ran trusted command."
